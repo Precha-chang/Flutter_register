@@ -12,7 +12,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Login App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
       ),
       home: LoginPage(),
       debugShowCheckedModeBanner: false,
@@ -60,37 +72,61 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock, size: 64, color: Theme.of(context).primaryColor),
+                    SizedBox(height: 32),
+                    Text('Welcome Back', style: Theme.of(context).textTheme.headlineMedium),
+                    SizedBox(height: 32),
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _login,
+                      child: Text('Login'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                        );
+                      },
+                      child: Text('Don\'t have an account? Register'),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text('Login'),
-            ),
-            SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterPage()),
-                );
-              },
-              child: Text('Register'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -132,26 +168,51 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Register')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person_add, size: 64, color: Theme.of(context).primaryColor),
+                    SizedBox(height: 32),
+                    Text('Create Account', style: Theme.of(context).textTheme.headlineMedium),
+                    SizedBox(height: 32),
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _register,
+                      child: Text('Register'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _register,
-              child: Text('Register'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -168,7 +229,7 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  String _userId = ''; // New variable to hold user ID
+  String _userId = '';
   String _username = '';
   String _firstName = '';
   String _lastName = '';
@@ -183,28 +244,27 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   Future<void> _fetchUserInfo() async {
-  final response = await http.get(
-    Uri.parse('https://wallet-api-7m1z.onrender.com/user/information'),
-    headers: {'Authorization': 'Bearer ${widget.token}'},
-  );
-
-  if (response.statusCode == 200) {
-    final userInfo = json.decode(response.body);
-    print(userInfo); // เพิ่มบรรทัดนี้เพื่อดู response ที่ได้รับ
-    setState(() {
-      _userId = userInfo['_id'] ?? ''; // ปรับให้ตรงกับ key ใน response ของ API
-      _username = userInfo['username'];
-      _firstName = userInfo['fname'] ?? '';
-      _lastName = userInfo['lname'] ?? '';
-      _newFirstNameController.text = _firstName;
-      _newLastNameController.text = _lastName;
-    });
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to fetch user information')),
+    final response = await http.get(
+      Uri.parse('https://wallet-api-7m1z.onrender.com/user/information'),
+      headers: {'Authorization': 'Bearer ${widget.token}'},
     );
+
+    if (response.statusCode == 200) {
+      final userInfo = json.decode(response.body);
+      setState(() {
+        _userId = userInfo['_id'] ?? '';
+        _username = userInfo['username'];
+        _firstName = userInfo['fname'] ?? '';
+        _lastName = userInfo['lname'] ?? '';
+        _newFirstNameController.text = _firstName;
+        _newLastNameController.text = _lastName;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch user information')),
+      );
+    }
   }
-}
 
   Future<void> _updateUserInfo() async {
     final response = await http.post(
@@ -249,37 +309,93 @@ class _UserInfoPageState extends State<UserInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('User Information')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('User ID: $_userId', style: TextStyle(fontSize: 18)), // Display user ID
-            Text('Username: $_username', style: TextStyle(fontSize: 18)),
-            Text('First Name: $_firstName', style: TextStyle(fontSize: 18)),
-            Text('Last Name: $_lastName', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _toggleEditing,
-              child: Text(_isEditing ? 'Cancel' : 'Edit'),
-            ),
-            SizedBox(height: 10),
-            if (_isEditing) ...[
-              TextField(
-                controller: _newFirstNameController,
-                decoration: InputDecoration(labelText: 'New First Name'),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.perm_identity),
+                        title: Text('User ID'),
+                        subtitle: Text(_userId),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.person),
+                        title: Text('Username'),
+                        subtitle: Text(_username),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.person_outline),
+                        title: Text('First Name'),
+                        subtitle: Text(_firstName),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.person_outline),
+                        title: Text('Last Name'),
+                        subtitle: Text(_lastName),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              TextField(
-                controller: _newLastNameController,
-                decoration: InputDecoration(labelText: 'New Last Name'),
+              SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _toggleEditing,
+                icon: Icon(_isEditing ? Icons.close : Icons.edit),
+                label: Text(_isEditing ? 'Cancel' : 'Edit Profile'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 50),
+                ),
               ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _updateUserInfo,
-                child: Text('Update User Information'),
-              ),
+              SizedBox(height: 20),
+              if (_isEditing) ...[
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _newFirstNameController,
+                          decoration: InputDecoration(
+                            labelText: 'New First Name',
+                            prefixIcon: Icon(Icons.person),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: _newLastNameController,
+                          decoration: InputDecoration(
+                            labelText: 'New Last Name',
+                            prefixIcon: Icon(Icons.person),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _updateUserInfo,
+                          icon: Icon(Icons.save),
+                          label: Text('Update User Information'),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
